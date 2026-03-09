@@ -1,0 +1,10 @@
+# Terraform
+
+Infrastructure/main/.terraform/
+Infrastructure/main/*.tfstate
+Infrastructure/main/*.tfstate.*
+Infrastructure/main/.terraform.tfstate.lock.info
+Infrastructure/main/crash.log
+Infrastructure/main/crash.*.log
+Infrastructure/main/*.tfplan
+
