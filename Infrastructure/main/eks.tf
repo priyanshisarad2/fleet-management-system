@@ -77,6 +77,7 @@ module "eks" {
   # This is where EKS node group (EC2 instances and its ENIs) will be provisioned
 
 
+
   ###############    Security Group    ###############
   control_plane_sg_name            = "${var.project_name}-eks-control-plane"
   eks_control_plane_sg_additional_rules = var.eks_control_plane_sg_additional_rules
@@ -102,7 +103,6 @@ module "eks" {
   ###############    EKS Managed Node Groups    ###############
   eks_managed_node_groups = {
       fleetman-node-group = {
-        # Allow temporarily disabling node group creation (e.g., during cluster/KMS imports)
         create         = var.create_eks_managed_node_group
         name           = "${var.project_name}-eks-node-group"
         instance_types = var.node_group_instance_types
@@ -127,7 +127,7 @@ module "eks" {
         disable_api_termination         = false # ec2 termination protection
 
 
-        # IAM Role
+        # IAM Role - for managed node group - their instance profile
         create_iam_role          = true
         iam_role_name            = "${var.project_name}-eks-managed-node-group"
         iam_role_use_name_prefix = false
@@ -140,7 +140,6 @@ module "eks" {
         create_security_group          = true
         security_group_name            = "${var.project_name}-eks-managed-node-group"
         security_group_use_name_prefix = false
-
 
 
         # EKS creates a SG for node-group - so we don't generally have to attach the cluster's primary SG to node-group
@@ -170,6 +169,4 @@ module "eks" {
   }
 
 
-
-  
 }

@@ -158,6 +158,24 @@ variable "enable_irsa" {
   default     = true
 }
 
+variable "create_irsa_ebs_csi_driver_iam_role" {
+  description = "Controls if the IRSA IAM role for the Amazon EBS CSI driver should be created"
+  type        = bool
+  default     = false
+}
+
+variable "create_eks_ebs_csi_driver_addon" {
+  description = "Controls if the Amazon EBS CSI Driver EKS add-on should be created"
+  type        = bool
+  default     = false
+}
+
+variable "eks_ebs_csi_driver_addon_version" {
+  description = "Version of the Amazon EBS CSI Driver EKS add-on"
+  type        = string
+  default     = null
+}
+
 variable "openid_connect_audiences" {
   description = "Extra OIDC audiences to include on the IAM OIDC provider (sts.amazonaws.com is always included)"
   type        = list(string)

@@ -8,8 +8,11 @@ account_id   = "331860160408"
 
 ########    Creation toggles (default: create nothing)    ########
 # Turn individual services on by setting the corresponding flag to true.
-create_vpc         = true
-create_eks_cluster = false
+create_vpc                      = true
+create_eks_cluster              = true
+create_eks_managed_node_group   = true
+create_eks_ebs_csi_driver_addon = true
+
 
 
 
@@ -48,9 +51,14 @@ single_nat_gateway = true
 
 
 
-########## EKS Cluster ##########
+#####################                   #####################
+#####################    EKS Cluster    #####################
+#####################                   #####################
 kubernetes_version                      = "1.34"
 eks_deletion_protection                 = false
+
+##########    EKS Addons    ##########
+eks_ebs_csi_driver_addon_version        = "v1.56.0-eksbuild.1" # latest version as of 2026-03-15
 
 ##########    CloudWatch Log Group    ##########
 create_eks_cluster_cloudwatch_log_group = false
