@@ -48,45 +48,20 @@ single_nat_gateway = true
 
 
 
-### EKS ###
+########## EKS Cluster ##########
 kubernetes_version                      = "1.34"
 eks_deletion_protection                 = false
+
+##########    CloudWatch Log Group    ##########
 create_eks_cluster_cloudwatch_log_group = false
 
-## IRSA (IAM Roles for Service Accounts)
-enable_irsa = true
-# Extra OIDC audiences; the EKS module always includes "sts.amazonaws.com" by default for IRSA.
-openid_connect_audiences = []
-# Keep true: auto-detect and include the OIDC root CA thumbprint for the IAM OIDC provider.
-include_oidc_root_ca_thumbprint = true
-# Rarely needed: additional OIDC server cert thumbprints (leave empty unless you have a custom TLS chain).
-custom_oidc_thumbprints = []
 
-
-eks_endpoint_private_access      = true # for worker nodes to join
-eks_endpoint_public_access       = true # for me
-eks_endpoint_public_access_cidrs = ["0.0.0.0/0"]
-
-eks_authentication_mode = "API"
-
-# Since the IAM user who created the cluster only has admin access to cluster
-# I am giving the root account full admin access to this cluster as well
-eks_access_entry_account_root_admin = {
-  principal_arn = "arn:aws:iam::331860160408:root"
-
-  policy_associations = {
-    admin = {
-      policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-      access_scope = {
-        type = "cluster"
-      }
-    }
-  }
-}
-
-# IMPORTANT: ensure the control-plane SG has egress so the control plane can reach kubelets on nodes.
-# Without this, node groups can fail with NodeCreationFailure/Unhealthy nodes.
-# THis is not added by default - because of which cluster creation was failing
+##########    Security Group    ##########
+/*
+  IMPORTANT: ensure the control-plane SG has egress so the control plane can reach kubelets on nodes.
+  Without this, node groups can fail with NodeCreationFailure/Unhealthy nodes.
+  This is not added by default - because of which cluster creation was failing
+*/
 eks_control_plane_sg_additional_rules = {
   egress_all = {
     type        = "egress"
@@ -98,7 +73,48 @@ eks_control_plane_sg_additional_rules = {
   }
 }
 
-# EKS managed node group
+
+
+##########    Cluster Authentication    ##########
+eks_authentication_mode = "API"
+
+# Since the IAM user who created the cluster only has admin access to cluster
+# I am giving the root account full admin access to this cluster as well
+eks_access_entry_account_root_admin = {
+  principal_arn = "arn:aws:iam::331860160408:root"
+
+  # Remember that even though root account has access to entire AWS - but it will not automatically will have access to eks cluster
+
+  # Which is why I am creating access entry for it - and associating a cluster access policy to it
+  policy_associations = {
+    admin = {
+      policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+      access_scope = {
+        type = "cluster"
+      }
+    }
+  }
+}
+
+eks_endpoint_private_access      = true # for worker nodes to join
+eks_endpoint_public_access       = true # for me
+eks_endpoint_public_access_cidrs = ["0.0.0.0/0"]
+
+
+
+##########    IRSA (IAM Roles for Service Accounts)    ##########
+enable_irsa = true
+# Extra OIDC audiences; the EKS module always includes "sts.amazonaws.com" by default for IRSA.
+openid_connect_audiences = []
+# Keep true: auto-detect and include the OIDC root CA thumbprint for the IAM OIDC provider.
+include_oidc_root_ca_thumbprint = true
+# Rarely needed: additional OIDC server cert thumbprints (leave empty unless you have a custom TLS chain).
+custom_oidc_thumbprints = []
+
+
+
+
+##########    EKS Managed Node Group    ##########
 node_group_instance_types = ["t3a.small"]
 node_group_min_size       = 3
 node_group_max_size       = 3

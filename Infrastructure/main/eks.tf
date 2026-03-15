@@ -6,69 +6,13 @@ module "eks" {
   eks_region         = var.region
   eks_cluster_name   = "${var.project_name}-eks-cluster"
 
-  # IRSA
-  enable_irsa                     = var.enable_irsa
-  openid_connect_audiences        = var.openid_connect_audiences
-  include_oidc_root_ca_thumbprint = var.include_oidc_root_ca_thumbprint
-  custom_oidc_thumbprints         = var.custom_oidc_thumbprints
-
-
-  #####   Cluster settings   #####
-  kubernetes_version      = var.kubernetes_version
-  eks_deletion_protection = var.eks_deletion_protection
-  eks_vpc_id              = module.vpc.vpc_id
-
-  # Both control-plane and node-group should be launched in private subnet
-  eks_control_plane_subnet_ids = module.vpc.private_subnet_ids  # This is where EKS cluster control plane (ENIs) will be provisioned
-  eks_node_group_subnet_ids    = module.vpc.private_subnet_ids  # This is where EKS node group (EC2 instances and its ENIs) will be provisioned
-
-  # Control plane upgrade support policy
-  eks_control_plane_upgrade_policy = {
-    support_type = "STANDARD"
-  }
-
-  eks_cluster_cloudwatch_log_group = var.create_eks_cluster_cloudwatch_log_group
-
-
-  #### Cluster OR Control Plane Security Group ####
-  control_plane_sg_name            = "${var.project_name}-eks-control-plane"
-
-  # Extra SG rules for control plane SG (defined in tfvars)
-  eks_control_plane_sg_additional_rules = var.eks_control_plane_sg_additional_rules
-  
-
-  # IAM Role for EKS cluster (control plane)
-  eks_control_plane_iam_role_name = "${var.project_name}-eks-control-plane"
-
-  # Endpoint access (API endpoint)
-  eks_endpoint_private_access      = var.eks_endpoint_private_access
-  eks_endpoint_public_access       = var.eks_endpoint_public_access
-  eks_endpoint_public_access_cidrs = var.eks_endpoint_public_access_cidrs
-
-
-  # Networking
-  eks_ip_family         = "ipv4"
-  eks_service_ipv4_cidr = null
-
-
-  # Access (API auth mode)
-  eks_authentication_mode = var.eks_authentication_mode
-  eks_access_entries = merge(
-    # Static root admin entry (from tfvars)
-    var.eks_access_entry_account_root_admin != null ? { account_root_admin = var.eks_access_entry_account_root_admin } : {},
-
-    # Optional extra entries
-    var.eks_access_entries
-  )
-
-
-  # Tags
   # Cluster-only tags are set here (not in tfvars)
   eks_cluster_tags = {
     Project     = var.project_name
     Environment = var.env
     Terraform   = "true"
   }
+
   # Global tags applied to all resources created by the EKS module
   eks_tags = {
     Project     = var.project_name
@@ -76,7 +20,137 @@ module "eks" {
     Terraform   = "true"
   }
 
-  ####  EKS Add-ons  ###
+
+
+
+  ###############    Cluster settings    ###############
+  kubernetes_version      = var.kubernetes_version
+  eks_deletion_protection = var.eks_deletion_protection
+  # Control plane upgrade support policy
+  eks_control_plane_upgrade_policy = {
+    support_type = "STANDARD"
+  }
+
+
+  ###############    Cluster Authentication    ###############
+  eks_authentication_mode = var.eks_authentication_mode
+
+  eks_access_entries = merge(
+    var.eks_access_entry_account_root_admin != null ? { account_root_admin = var.eks_access_entry_account_root_admin } : {},
+
+    # Optional extra entries
+    var.eks_access_entries
+  )
+  /*
+  Important: By setting the "enable_cluster_creator_admin_permissions" to "true" - I gave "devops" user admin access to this EKS cluster via EKS Access Entry.
+
+  But the root user of my AWS account - does not have admin access to this EKS cluster - even though it has admin access to AWS account.
+
+  So, I need to give root user admin access to this EKS cluster via EKS Access Entry. I need to create an EKS Access Entry for it.
+
+  ADDING additional users - If we want to give access to any other IAM user/role to access this EKS cluster - we can add them here.
+
+  */
+
+  eks_endpoint_private_access      = var.eks_endpoint_private_access
+  eks_endpoint_public_access       = var.eks_endpoint_public_access
+  eks_endpoint_public_access_cidrs = var.eks_endpoint_public_access_cidrs
+
+
+
+  ###############    CloudWatch Log Group    ###############
+  eks_cluster_cloudwatch_log_group = var.create_eks_cluster_cloudwatch_log_group
+
+
+
+  ###############    Network    ###############
+  eks_vpc_id                    = module.vpc.vpc_id
+  # ip_family: chooses whether pods/services use IPv4 (common) or IPv6 addresses (must be decided at cluster creation)
+  eks_ip_family         = "ipv4"
+  # service_ipv4_cidr: the IPv4 range used for Kubernetes Service (ClusterIP) IPs CIDR; leave null to let EKS pick the default
+  eks_service_ipv4_cidr = null
+
+  # Both control-plane and node-group should be launched in private subnet
+  eks_control_plane_subnet_ids  = module.vpc.private_subnet_ids  
+  # This is where EKS cluster control plane (ENIs) will be provisioned
+  eks_node_group_subnet_ids     = module.vpc.private_subnet_ids  
+  # This is where EKS node group (EC2 instances and its ENIs) will be provisioned
+
+
+  ###############    Security Group    ###############
+  control_plane_sg_name            = "${var.project_name}-eks-control-plane"
+  eks_control_plane_sg_additional_rules = var.eks_control_plane_sg_additional_rules
+  # egress rules for cluster/control-plane default SG
+  eks_node_group_sg_name = "${var.project_name}-eks-node-group"
+
+
+
+  ###############    IRSA    ###############
+  enable_irsa                     = var.enable_irsa
+  openid_connect_audiences        = var.openid_connect_audiences
+  include_oidc_root_ca_thumbprint = var.include_oidc_root_ca_thumbprint
+  custom_oidc_thumbprints         = var.custom_oidc_thumbprints
+
+
+
+  ###############    IAM Role    ###############
+  # IAM Role for EKS cluster (control plane)
+  eks_control_plane_iam_role_name = "${var.project_name}-eks-control-plane"
+
+
+
+  ###############    EKS Managed Node Groups    ###############
+  eks_managed_node_groups = {
+      fleetman-node-group = {
+        # Allow temporarily disabling node group creation (e.g., during cluster/KMS imports)
+        create         = var.create_eks_managed_node_group
+        name           = "${var.project_name}-eks-node-group"
+        instance_types = var.node_group_instance_types
+        min_size       = var.node_group_min_size
+        max_size       = var.node_group_max_size
+        desired_size   = var.node_group_desired_size
+        disk_size      = var.node_group_ebs_disk_size
+        force_delete   = true
+
+        tags = {
+          Name = "worker" # name of ec2 instance of managed node group
+        }
+
+        # Let the module generate bootstrap user data so nodes join the EKS cluster
+        enable_bootstrap_user_data = true
+
+        # Node Group ASG - Launch Template
+        create_launch_template          = true
+        launch_template_name            = "${var.project_name}-eks-managed-node-group"
+        launch_template_use_name_prefix = false
+        ebs_optimized                   = true
+        disable_api_termination         = false # ec2 termination protection
+
+
+        # IAM Role
+        create_iam_role          = true
+        iam_role_name            = "${var.project_name}-eks-managed-node-group"
+        iam_role_use_name_prefix = false
+        # Critical for aws-node (VPC CNI) to attach secondary ENIs / assign pod IPs.
+        # AWS official guidance calls this out as a common root cause of CNI/network plugin failures.
+        iam_role_attach_cni_policy = true
+
+
+        # Security Group
+        create_security_group          = true
+        security_group_name            = "${var.project_name}-eks-managed-node-group"
+        security_group_use_name_prefix = false
+
+
+
+        # EKS creates a SG for node-group - so we don't generally have to attach the cluster's primary SG to node-group
+        attach_cluster_primary_security_group = false
+      }
+    }
+
+
+
+  ###############    EKS Add-ons    ###############
   eks_addons = {
     coredns = {}
     eks-pod-identity-agent = {
@@ -96,54 +170,6 @@ module "eks" {
   }
 
 
-  #### Managed Node Group  ####
-  eks_node_group_sg_name = "${var.project_name}-eks-node-group"
 
-  eks_managed_node_groups = {
-    fleetman-node-group = {
-      # Allow temporarily disabling node group creation (e.g., during cluster/KMS imports)
-      create         = var.create_eks_managed_node_group
-      name           = "${var.project_name}-eks-node-group"
-      instance_types = var.node_group_instance_types
-      min_size       = var.node_group_min_size
-      max_size       = var.node_group_max_size
-      desired_size   = var.node_group_desired_size
-      disk_size      = var.node_group_ebs_disk_size
-      force_delete   = true
-
-      tags = {
-        Name = "worker" # name of ec2 instance of managed node group
-      }
-
-      # Let the module generate bootstrap user data so nodes join the EKS cluster
-      enable_bootstrap_user_data = true
-
-      # Node Group ASG - Launch Template
-      create_launch_template          = true
-      launch_template_name            = "${var.project_name}-eks-managed-node-group"
-      launch_template_use_name_prefix = false
-      ebs_optimized                   = true
-      disable_api_termination         = false # ec2 termination protection
-
-
-      # IAM Role
-      create_iam_role          = true
-      iam_role_name            = "${var.project_name}-eks-managed-node-group"
-      iam_role_use_name_prefix = false
-      # Critical for aws-node (VPC CNI) to attach secondary ENIs / assign pod IPs.
-      # AWS official guidance calls this out as a common root cause of CNI/network plugin failures.
-      iam_role_attach_cni_policy = true
-
-
-      # Security Group
-      create_security_group          = true
-      security_group_name            = "${var.project_name}-eks-managed-node-group"
-      security_group_use_name_prefix = false
-
-
-
-      # EKS creates a SG for node-group - so we don't generally have to attach the cluster's primary SG to node-group
-      attach_cluster_primary_security_group = false
-    }
-  }
+  
 }
