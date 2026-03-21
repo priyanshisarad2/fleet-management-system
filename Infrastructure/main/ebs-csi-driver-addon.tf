@@ -30,7 +30,7 @@ That creates a Terraform dependency cycle.
 
 Fix:
 - create the EKS cluster first via `module.eks`
-- read the cluster OIDC information
+- use the EKS module's OIDC provider output
 - create the EBS CSI Driver IRSA role
 - create the EBS CSI Driver add-on separately
 - pass `service_account_role_arn` to the add-on so EKS manages the service
@@ -39,17 +39,6 @@ Fix:
 This avoids the dependency loop and keeps the full setup managed in Terraform.
 */
 
-##########    Read the EKS cluster and OIDC provider    ##########
-data "aws_eks_cluster" "this" {
-  name = "${var.project_name}-eks-cluster"
-
-  # Ensure the cluster exists before reading it
-  depends_on = [module.eks]
-}
-
-data "aws_iam_openid_connect_provider" "eks" {
-  url = data.aws_eks_cluster.this.identity[0].oidc[0].issuer
-}
 
 ##########    IRSA IAM Role for Amazon EBS CSI Driver    ##########
 
@@ -63,7 +52,7 @@ module "irsa-ebs-csi-driver-iam-role" {
 
   oidc_providers = {
     eks = {
-      provider_arn               = data.aws_iam_openid_connect_provider.eks.arn
+      provider_arn               = module.eks.oidc_provider_arn
       namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
     }
   }
