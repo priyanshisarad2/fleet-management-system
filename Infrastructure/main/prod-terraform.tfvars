@@ -79,7 +79,16 @@ eks_control_plane_sg_additional_rules = {
   }
 }
 
-
+eks_node_group_sg_additional_rules = {
+  ingress_nodeport_30080 = {
+    type        = "ingress"
+    protocol    = "tcp"
+    from_port   = 30080
+    to_port     = 30080
+    description = "Allow TCP 30080 of fleetman-webapp service from anywhere"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
 
 ##########    Cluster Authentication    ##########
 eks_authentication_mode = "API"

@@ -162,6 +162,24 @@ variable "eks_node_group_sg_name" {
   default     = null
 }
 
+variable "eks_node_group_sg_additional_rules" {
+  description = "Additional security group rules to add to the EKS node security group created by the module"
+  type = map(object({
+    protocol                      = optional(string, "tcp")
+    from_port                     = number
+    to_port                       = number
+    type                          = optional(string, "ingress")
+    description                   = optional(string)
+    cidr_blocks                   = optional(list(string))
+    ipv6_cidr_blocks              = optional(list(string))
+    prefix_list_ids               = optional(list(string))
+    self                          = optional(bool)
+    source_cluster_security_group = optional(bool, false)
+    source_security_group_id      = optional(string)
+  }))
+  default = {}
+}
+
 variable "eks_managed_node_groups" {
   description = "Map of EKS managed node group definitions (passed to terraform-aws-modules/eks/aws)"
   type        = any

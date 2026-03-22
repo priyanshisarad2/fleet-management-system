@@ -73,8 +73,6 @@ module "irsa-ebs-csi-driver-iam-role" {
   # Attach the EBS CSI permissions policy (so the controller can create/attach volumes)
   attach_ebs_csi_policy     = true
   ebs_csi_kms_cmk_arns      = []
-
-  depends_on = [module.eks]
 }
 
 
@@ -109,8 +107,11 @@ module "eks-addons-ebs-csi-driver" {
   addon_version   = var.eks_ebs_csi_driver_addon_version
   cluster_name    = "${var.project_name}-eks-cluster"
 
-  /* Let the EKS add-on manage the service account -> IAM role association.
+  /* 
+  Let the EKS add-on manage the service account -> IAM role association.
   This is done automatically by terraform using "service_account_role_arn"
+
+  This means annotate the EBS CSI driver service account to use the IAM role.
   */
   service_account_role_arn = module.irsa-ebs-csi-driver-iam-role.arn
   resolve_conflicts_on_create = "OVERWRITE"

@@ -83,6 +83,7 @@ module "eks" {
   eks_control_plane_sg_additional_rules = var.eks_control_plane_sg_additional_rules
   # egress rules for cluster/control-plane default SG
   eks_node_group_sg_name = "${var.project_name}-eks-node-group"
+  eks_node_group_sg_additional_rules = var.eks_node_group_sg_additional_rules # additional rules for node group SG - nodeport for webapp - ingress rule for nodeport 30080
 
 
 

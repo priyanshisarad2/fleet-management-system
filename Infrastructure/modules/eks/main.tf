@@ -140,6 +140,7 @@ module "eks" {
   create_node_security_group          = true
   node_security_group_name            = var.eks_node_group_sg_name
   node_security_group_use_name_prefix = false
+  node_security_group_additional_rules = var.eks_node_group_sg_additional_rules
 
 
 
