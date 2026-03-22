@@ -110,7 +110,7 @@ spec:
     spec:
       containers:
       - name: webapp
-        image: docker.io/dockerpriyanshi1/k8s-fleetman-webapp:release3
+        image: docker.io/dockerpriyanshi1/k8s-fleetman-webapp:release4
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: production-microservice

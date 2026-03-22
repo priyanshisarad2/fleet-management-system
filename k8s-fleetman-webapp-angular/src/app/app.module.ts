@@ -18,8 +18,10 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
 import { DOCUMENT } from '@angular/platform-browser';
 
+const websocketProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+
 const stompConfig: StompConfig = {
-     url: "ws://" + window.location.hostname + ":" + window.location.port + "/api/updates",
+     url: websocketProtocol + window.location.host + "/api/updates",
      // TODO will reinstate when dev complete.
      headers: {
      },

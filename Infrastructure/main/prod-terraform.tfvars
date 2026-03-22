@@ -8,10 +8,11 @@ account_id   = "331860160408"
 
 ########    Creation toggles (default: create nothing)    ########
 # Turn individual services on by setting the corresponding flag to true.
-create_vpc                      = false
-create_eks_cluster              = false
-create_eks_managed_node_group   = false
-create_eks_ebs_csi_driver_addon = false
+create_vpc                        = true
+create_eks_cluster                = true
+create_eks_managed_node_group     = true
+create_eks_ebs_csi_driver_addon   = true
+create_cloudfront_fleetman_webapp = true
 
 
 ########    VPC - Public and Private Subnets    ########
@@ -48,6 +49,13 @@ single_nat_gateway = true
 
 
 
+########    CloudFront - Fleetman Webapp    ########
+fleetman_webapp_domain = "fleetman.priyanshiseniordevops.online"
+acm_certificate_arn = "arn:aws:acm:us-east-1:331860160408:certificate/8b217ec7-9f23-45f6-bcf0-0603c77ba462"
+fleetman_webapp_alb_origin_domain = "fleetman-alb.priyanshiseniordevops.online"
+
+
+
 
 #####################                   #####################
 #####################    EKS Cluster    #####################
@@ -80,15 +88,9 @@ eks_control_plane_sg_additional_rules = {
 }
 
 eks_node_group_sg_additional_rules = {
-  ingress_nodeport_30080 = {
-    type        = "ingress"
-    protocol    = "tcp"
-    from_port   = 30080
-    to_port     = 30080
-    description = "Allow TCP 30080 of fleetman-webapp service from anywhere"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }
+
+
 
 ##########    Cluster Authentication    ##########
 eks_authentication_mode = "API"
@@ -135,5 +137,3 @@ node_group_min_size       = 3
 node_group_max_size       = 3
 node_group_desired_size   = 3
 node_group_ebs_disk_size  = 20
-
-
