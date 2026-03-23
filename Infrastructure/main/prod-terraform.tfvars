@@ -12,7 +12,7 @@ create_vpc                        = true
 create_eks_cluster                = true
 create_eks_managed_node_group     = true
 create_eks_ebs_csi_driver_addon   = true
-create_cloudfront_fleetman_webapp = true
+create_cloudfront_fleetman_webapp = false
 
 
 ########    VPC - Public and Private Subnets    ########
