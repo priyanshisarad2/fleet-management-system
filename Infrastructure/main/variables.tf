@@ -274,6 +274,12 @@ variable "node_group_ebs_disk_size" {
   default     = null
 }
 
+variable "node_group_iam_role_additional_policies" {
+  description = "Additional AWS managed IAM policy ARNs to attach to the EKS managed node group IAM role"
+  type        = map(string)
+  default     = {}
+}
+
 variable "node_group_inputs_validation" {
   description = "Internal validation switch (do not set). Ensures required node group inputs are provided when creating EKS."
   type        = bool

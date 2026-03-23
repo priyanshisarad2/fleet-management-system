@@ -134,6 +134,7 @@ module "eks" {
         # Critical for aws-node (VPC CNI) to attach secondary ENIs / assign pod IPs.
         # AWS official guidance calls this out as a common root cause of CNI/network plugin failures.
         iam_role_attach_cni_policy = true
+        iam_role_additional_policies = var.node_group_iam_role_additional_policies
 
 
         # Security Group

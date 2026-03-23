@@ -133,7 +133,19 @@ custom_oidc_thumbprints = []
 
 ##########    EKS Managed Node Group    ##########
 node_group_instance_types = ["t3a.small"]
-node_group_min_size       = 3
-node_group_max_size       = 3
-node_group_desired_size   = 3
+node_group_min_size       = 4
+node_group_max_size       = 4
+node_group_desired_size   = 4
 node_group_ebs_disk_size  = 20
+
+# Attaching extra policies to the node IAM role so Fluent Bit / CloudWatch Agent on the EKS worker nodes
+# can write container logs to CloudWatch Logs.
+
+# This AWS-managed policy can:
+# - create CloudWatch log groups and log streams
+# - put/upload log events
+# - describe existing log groups and streams
+# - set log retention policy
+node_group_iam_role_additional_policies = {
+  cloudwatch_agent = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
