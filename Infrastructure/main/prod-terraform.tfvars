@@ -13,6 +13,8 @@ create_eks_cluster                = true
 create_eks_managed_node_group     = true
 create_eks_ebs_csi_driver_addon   = true
 create_cloudfront_fleetman_webapp = false
+setup_eks_cluster_monitoring      = true
+create_aws_prometheus_adot_writer_ecr = true
 
 
 ########    VPC - Public and Private Subnets    ########
@@ -148,4 +150,16 @@ node_group_ebs_disk_size  = 20
 # - set log retention policy
 node_group_iam_role_additional_policies = {
   cloudwatch_agent = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+  ecr_read_only    = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
+
+
+
+
+
+
+#####################                   #####################
+#####################    Monitoring    #####################
+#####################                   #####################
+prometheus_retention_period_in_days = 3
+prometheus_cloudwatch_log_group_retention_in_days = 3

@@ -38,3 +38,15 @@ variable "ebs_csi_kms_cmk_arns" {
   default     = []
 }
 
+variable "attach_amazon_managed_service_prometheus_policy" {
+  description = "Attach the Amazon Managed Service for Prometheus IAM policy to the role"
+  type        = bool
+  default     = false
+}
+
+variable "amazon_managed_service_prometheus_workspace_arns" {
+  description = "List of AMP workspace ARNs the role can read from and write to"
+  type        = list(string)
+  default     = []
+}
+

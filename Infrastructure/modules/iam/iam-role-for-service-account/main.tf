@@ -39,5 +39,13 @@ module "iam_role_for_service_accounts" {
     EBS CSI role permission to use those key ARNs for encrypted volume operations.
     If you are not using a customer-managed KMS key, you can leave this empty.
   */ 
+
+  attach_amazon_managed_service_prometheus_policy = var.attach_amazon_managed_service_prometheus_policy
+  amazon_managed_service_prometheus_workspace_arns = var.amazon_managed_service_prometheus_workspace_arns
+  /*
+    For ADOT or Prometheus running in EKS, this attaches the upstream AMP IAM
+    policy so the IRSA role can remote_write and read AMP metadata for the
+    specified workspace ARNs.
+  */
 }
 

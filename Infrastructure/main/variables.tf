@@ -236,6 +236,14 @@ variable "custom_oidc_thumbprints" {
   default     = []
 }
 
+######## ECR ########
+
+variable "create_aws_prometheus_adot_writer_ecr" {
+  description = "Controls whether the ECR repository for the AWS Prometheus ADOT writer image should be created"
+  type        = bool
+  default     = false
+}
+
 ######## EKS Managed Node Group ########
 
 variable "create_eks_managed_node_group" {
@@ -297,5 +305,57 @@ variable "node_group_inputs_validation" {
     )
     error_message = "When create_eks_cluster=true, you must set node_group_instance_types, node_group_min_size, node_group_max_size, node_group_desired_size, and node_group_ebs_disk_size (typically via prod-terraform.tfvars)."
   }
+}
+
+######## Monitoring ########
+
+variable "setup_eks_cluster_monitoring" {
+  description = "Controls whether AMP resources and the ADOT writer IRSA role should be created for EKS monitoring"
+  type        = bool
+  default     = false
+}
+
+variable "prometheus_workspace_alias" {
+  description = "Optional friendly name for the AMP workspace. If null, a name is derived from project and environment."
+  type        = string
+  default     = null
+}
+
+variable "prometheus_retention_period_in_days" {
+  description = "Number of days to retain Prometheus metrics in the AMP workspace"
+  type        = number
+  default     = null
+}
+
+variable "prometheus_cloudwatch_log_group_retention_in_days" {
+  description = "Number of days to retain AMP CloudWatch log events"
+  type        = number
+  default     = 30
+}
+
+variable "prometheus_resource_policy_statements" {
+  description = "Optional custom AMP workspace resource policy statements. Leave null to use the defaults configured in monitoring.tf."
+  type = map(object({
+    sid           = optional(string)
+    actions       = optional(list(string))
+    not_actions   = optional(list(string))
+    effect        = optional(string, "Allow")
+    resources     = optional(list(string))
+    not_resources = optional(list(string))
+    principals = optional(list(object({
+      type        = string
+      identifiers = list(string)
+    })))
+    not_principals = optional(list(object({
+      type        = string
+      identifiers = list(string)
+    })))
+    condition = optional(list(object({
+      test     = string
+      variable = string
+      values   = list(string)
+    })))
+  }))
+  default = null
 }
 
