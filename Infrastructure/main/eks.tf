@@ -64,25 +64,25 @@ module "eks" {
 
 
   ###############    Network    ###############
-  eks_vpc_id                    = module.vpc.vpc_id
+  eks_vpc_id = module.vpc.vpc_id
   # ip_family: chooses whether pods/services use IPv4 (common) or IPv6 addresses (must be decided at cluster creation)
-  eks_ip_family         = "ipv4"
+  eks_ip_family = "ipv4"
   # service_ipv4_cidr: the IPv4 range used for Kubernetes Service (ClusterIP) IPs CIDR; leave null to let EKS pick the default
   eks_service_ipv4_cidr = null
 
   # Both control-plane and node-group should be launched in private subnet
-  eks_control_plane_subnet_ids  = module.vpc.private_subnet_ids  
+  eks_control_plane_subnet_ids = module.vpc.private_subnet_ids
   # This is where EKS cluster control plane (ENIs) will be provisioned
-  eks_node_group_subnet_ids     = module.vpc.private_subnet_ids  
+  eks_node_group_subnet_ids = module.vpc.private_subnet_ids
   # This is where EKS node group (EC2 instances and its ENIs) will be provisioned
 
 
 
   ###############    Security Group    ###############
-  control_plane_sg_name            = "${var.project_name}-eks-control-plane"
+  control_plane_sg_name                 = "${var.project_name}-eks-control-plane"
   eks_control_plane_sg_additional_rules = var.eks_control_plane_sg_additional_rules
   # egress rules for cluster/control-plane default SG
-  eks_node_group_sg_name = "${var.project_name}-eks-node-group"
+  eks_node_group_sg_name             = "${var.project_name}-eks-node-group"
   eks_node_group_sg_additional_rules = var.eks_node_group_sg_additional_rules # If I want to add additional rules to node group SG - I can add them here
 
 
@@ -102,51 +102,51 @@ module "eks" {
 
   ###############    EKS Managed Node Groups    ###############
   eks_managed_node_groups = {
-      fleetman-node-group = {
-        create         = var.create_eks_managed_node_group
-        name           = "${var.project_name}-eks-node-group"
-        instance_types = var.node_group_instance_types
-        min_size       = var.node_group_min_size
-        max_size       = var.node_group_max_size
-        desired_size   = var.node_group_desired_size
-        disk_size      = var.node_group_ebs_disk_size
-        force_delete   = true
+    fleetman-node-group = {
+      create         = var.create_eks_managed_node_group
+      name           = "${var.project_name}-eks-node-group"
+      instance_types = var.node_group_instance_types
+      min_size       = var.node_group_min_size
+      max_size       = var.node_group_max_size
+      desired_size   = var.node_group_desired_size
+      disk_size      = var.node_group_ebs_disk_size
+      force_delete   = true
 
-        tags = {
-          Name = "worker" # name of ec2 instance of managed node group
-        }
-
-        # Let the module generate bootstrap user data so nodes join the EKS cluster
-        enable_bootstrap_user_data = true
-
-        # Node Group ASG - Launch Template
-        create_launch_template          = true
-        launch_template_name            = "${var.project_name}-eks-managed-node-group"
-        launch_template_use_name_prefix = false
-        ebs_optimized                   = true
-        disable_api_termination         = false # ec2 termination protection
-
-
-        # IAM Role - for managed node group - their instance profile
-        create_iam_role          = true
-        iam_role_name            = "${var.project_name}-eks-managed-node-group"
-        iam_role_use_name_prefix = false
-        # Critical for aws-node (VPC CNI) to attach secondary ENIs / assign pod IPs.
-        # AWS official guidance calls this out as a common root cause of CNI/network plugin failures.
-        iam_role_attach_cni_policy = true
-        iam_role_additional_policies = var.node_group_iam_role_additional_policies
-
-
-        # Security Group
-        create_security_group          = true
-        security_group_name            = "${var.project_name}-eks-managed-node-group"
-        security_group_use_name_prefix = false
-
-
-        # EKS creates a SG for node-group - so we don't generally have to attach the cluster's primary SG to node-group
-        attach_cluster_primary_security_group = false
+      tags = {
+        Name = "worker" # name of ec2 instance of managed node group
       }
+
+      # Let the module generate bootstrap user data so nodes join the EKS cluster
+      enable_bootstrap_user_data = true
+
+      # Node Group ASG - Launch Template
+      create_launch_template          = true
+      launch_template_name            = "${var.project_name}-eks-managed-node-group"
+      launch_template_use_name_prefix = false
+      ebs_optimized                   = true
+      disable_api_termination         = false # ec2 termination protection
+
+
+      # IAM Role - for managed node group - their instance profile
+      create_iam_role          = true
+      iam_role_name            = "${var.project_name}-eks-managed-node-group"
+      iam_role_use_name_prefix = false
+      # Critical for aws-node (VPC CNI) to attach secondary ENIs / assign pod IPs.
+      # AWS official guidance calls this out as a common root cause of CNI/network plugin failures.
+      iam_role_attach_cni_policy   = true
+      iam_role_additional_policies = var.node_group_iam_role_additional_policies
+
+
+      # Security Group
+      create_security_group          = true
+      security_group_name            = "${var.project_name}-eks-managed-node-group"
+      security_group_use_name_prefix = false
+
+
+      # EKS creates a SG for node-group - so we don't generally have to attach the cluster's primary SG to node-group
+      attach_cluster_primary_security_group = false
     }
+  }
 
 
 

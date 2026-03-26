@@ -57,7 +57,7 @@ module "irsa-ebs-csi-driver-iam-role" {
     }
   }
   # When EBS CSI Driver is installed as EKS addon - it will get installed in "kube-system" namespace - and will create a service account called "ebs-csi-controller-sa"
-    /*
+  /*
     This part will also set the trust policy for the IAM role.
     It will set the trust policy for the IAM role to allow the service accounts to assume the role.
 
@@ -71,8 +71,8 @@ module "irsa-ebs-csi-driver-iam-role" {
   */
 
   # Attach the EBS CSI permissions policy (so the controller can create/attach volumes)
-  attach_ebs_csi_policy     = true
-  ebs_csi_kms_cmk_arns      = []
+  attach_ebs_csi_policy = true
+  ebs_csi_kms_cmk_arns  = []
 }
 
 
@@ -99,13 +99,13 @@ ebs_csi_kms_cmk_arns = [] - means we are not using a
 ##########    Amazon EBS CSI Driver Add-on    ##########
 
 module "eks-addons-ebs-csi-driver" {
-  source          = "../modules/eks-addons"
+  source = "../modules/eks-addons"
 
-  create          = var.create_eks_ebs_csi_driver_addon
-  region          = var.region
-  addon_name      = "aws-ebs-csi-driver"
-  addon_version   = var.eks_ebs_csi_driver_addon_version
-  cluster_name    = "${var.project_name}-eks-cluster"
+  create        = var.create_eks_ebs_csi_driver_addon
+  region        = var.region
+  addon_name    = "aws-ebs-csi-driver"
+  addon_version = var.eks_ebs_csi_driver_addon_version
+  cluster_name  = "${var.project_name}-eks-cluster"
 
   /* 
   Let the EKS add-on manage the service account -> IAM role association.
@@ -113,7 +113,7 @@ module "eks-addons-ebs-csi-driver" {
 
   This means annotate the EBS CSI driver service account to use the IAM role.
   */
-  service_account_role_arn = module.irsa-ebs-csi-driver-iam-role.arn
+  service_account_role_arn    = module.irsa-ebs-csi-driver-iam-role.arn
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
   preserve                    = true

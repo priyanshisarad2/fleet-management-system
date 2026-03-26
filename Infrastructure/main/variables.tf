@@ -359,3 +359,75 @@ variable "prometheus_resource_policy_statements" {
   default = null
 }
 
+variable "create_grafana" {
+  description = "Controls whether the Amazon Managed Grafana workspace should be created"
+  type        = bool
+  default     = false
+}
+
+variable "create_workspace" {
+  description = "Controls whether the Amazon Managed Grafana workspace resource should be created"
+  type        = bool
+  default     = false
+}
+
+variable "grafana_version" {
+  description = "Grafana version to use for the Amazon Managed Grafana workspace"
+  type        = string
+  default     = "10.4"
+}
+
+variable "grafana_workspace_name" {
+  description = "Name of the Amazon Managed Grafana workspace"
+  type        = string
+  default     = null
+}
+
+variable "grafana_workspace_description" {
+  description = "Description of the Amazon Managed Grafana workspace"
+  type        = string
+  default     = null
+}
+
+variable "grafana_account_access_type" {
+  description = "The type of account access for the Grafana workspace. Valid values are CURRENT_ACCOUNT and ORGANIZATION"
+  type        = string
+  default     = "CURRENT_ACCOUNT"
+}
+
+variable "grafana_permission_type" {
+  description = "Permission model for the Grafana workspace. Valid values are SERVICE_MANAGED and CUSTOMER_MANAGED"
+  type        = string
+  default     = "SERVICE_MANAGED"
+}
+
+variable "grafana_authentication_providers" {
+  description = "Authentication providers for the Grafana workspace. Valid values are AWS_SSO, SAML, or both"
+  type        = list(string)
+  default     = ["AWS_SSO"]
+}
+
+variable "grafana_data_sources" {
+  description = "AWS data sources to enable in the Grafana workspace"
+  type        = list(string)
+  default     = ["PROMETHEUS"]
+}
+
+variable "grafana_network_access_control" {
+  description = "Network access control configuration for the Grafana workspace"
+  type        = any
+  default     = {}
+}
+
+variable "grafana_role_associations" {
+  description = "Map of Grafana workspace roles to IAM Identity Center user/group IDs"
+  type        = any
+  default     = {}
+}
+
+variable "associate_license" {
+  description = "Whether to associate a Grafana Enterprise license with the workspace"
+  type        = bool
+  default     = false
+}
+

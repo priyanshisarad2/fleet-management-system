@@ -46,7 +46,7 @@ module "aws-managed-prometheus" {
   #### Resource Policy ####
   # The workspace policy allows the ADOT IRSA role to remote_write into AMP
   # and allows Amazon Managed Grafana to query the workspace.
-  create_resource_policy   = var.setup_eks_cluster_monitoring
+  create_resource_policy = var.setup_eks_cluster_monitoring
   resource_policy_statements = {
     eks_remote_write = {
       sid     = "AllowEksPrometheusWriter"
@@ -78,7 +78,7 @@ module "aws-managed-prometheus" {
 
 
   ####  Cloudwatch Log Group  ####
-  cloudwatch_log_group_name = "${var.project_name}-eks-prometheus-adot-writer-log-group"
+  cloudwatch_log_group_name              = "${var.project_name}-eks-prometheus-adot-writer-log-group"
   cloudwatch_log_group_retention_in_days = var.prometheus_cloudwatch_log_group_retention_in_days
 
 
@@ -91,5 +91,40 @@ module "aws-managed-prometheus" {
     Environment = var.env
     Terraform   = "true"
     Service     = "monitoring"
+  }
+}
+
+
+
+
+module "aws-managed-grafana" {
+  source = "../modules/monitoring/aws-grafana"
+
+  create_grafana  = var.setup_eks_cluster_monitoring
+  grafana_version = var.grafana_version
+
+  ### Workspace Settings ###
+  workspace_name        = "${var.project_name}-aws-grafana"
+  workspace_description = "AWS Managed Grafana workspace for ${var.project_name}"
+
+  account_access_type = var.grafana_account_access_type
+
+  permission_type = var.grafana_permission_type
+
+  authentication_providers = var.grafana_authentication_providers
+
+  data_sources = var.grafana_data_sources
+
+  role_associations = var.grafana_role_associations
+
+  network_access_control = var.grafana_network_access_control
+
+  associate_license = var.associate_license
+
+
+
+  tags = {
+    Project   = var.project_name
+    Terraform = "true"
   }
 }

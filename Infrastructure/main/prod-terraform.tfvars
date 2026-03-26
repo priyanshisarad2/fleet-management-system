@@ -8,12 +8,12 @@ account_id   = "331860160408"
 
 ########    Creation toggles (default: create nothing)    ########
 # Turn individual services on by setting the corresponding flag to true.
-create_vpc                        = true
-create_eks_cluster                = true
-create_eks_managed_node_group     = true
-create_eks_ebs_csi_driver_addon   = true
-create_cloudfront_fleetman_webapp = false
-setup_eks_cluster_monitoring      = true
+create_vpc                            = true
+create_eks_cluster                    = true
+create_eks_managed_node_group         = true
+create_eks_ebs_csi_driver_addon       = true
+create_cloudfront_fleetman_webapp     = true
+setup_eks_cluster_monitoring          = true
 create_aws_prometheus_adot_writer_ecr = true
 
 
@@ -52,8 +52,8 @@ single_nat_gateway = true
 
 
 ########    CloudFront - Fleetman Webapp    ########
-fleetman_webapp_domain = "fleetman.priyanshiseniordevops.online"
-acm_certificate_arn = "arn:aws:acm:us-east-1:331860160408:certificate/8b217ec7-9f23-45f6-bcf0-0603c77ba462"
+fleetman_webapp_domain            = "fleetman.priyanshiseniordevops.online"
+acm_certificate_arn               = "arn:aws:acm:us-east-1:331860160408:certificate/8b217ec7-9f23-45f6-bcf0-0603c77ba462"
 fleetman_webapp_alb_origin_domain = "fleetman-alb.priyanshiseniordevops.online"
 
 
@@ -62,11 +62,11 @@ fleetman_webapp_alb_origin_domain = "fleetman-alb.priyanshiseniordevops.online"
 #####################                   #####################
 #####################    EKS Cluster    #####################
 #####################                   #####################
-kubernetes_version                      = "1.34"
-eks_deletion_protection                 = false
+kubernetes_version      = "1.34"
+eks_deletion_protection = false
 
 ##########    EKS Addons    ##########
-eks_ebs_csi_driver_addon_version        = "v1.56.0-eksbuild.1" # latest version as of 2026-03-15
+eks_ebs_csi_driver_addon_version = "v1.56.0-eksbuild.1" # latest version as of 2026-03-15
 
 ##########    CloudWatch Log Group    ##########
 create_eks_cluster_cloudwatch_log_group = false
@@ -134,7 +134,7 @@ custom_oidc_thumbprints = []
 
 
 ##########    EKS Managed Node Group    ##########
-node_group_instance_types = ["t3a.small"]
+node_group_instance_types = ["t3a.medium"]
 node_group_min_size       = 4
 node_group_max_size       = 4
 node_group_desired_size   = 4
@@ -161,5 +161,16 @@ node_group_iam_role_additional_policies = {
 #####################                   #####################
 #####################    Monitoring    #####################
 #####################                   #####################
-prometheus_retention_period_in_days = 3
+prometheus_retention_period_in_days               = 3
 prometheus_cloudwatch_log_group_retention_in_days = 3
+
+grafana_account_access_type      = "CURRENT_ACCOUNT"
+grafana_authentication_providers = ["AWS_SSO"]
+grafana_data_sources             = ["PROMETHEUS"]
+grafana_role_associations = {
+  ADMIN = {
+    user_ids = ["c428f4b8-a001-707f-aece-163d1d051831"]
+  }
+}
+grafana_network_access_control = {}
+associate_license              = false
